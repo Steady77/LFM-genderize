@@ -1,50 +1,28 @@
-const UI_ELEMS = {
-    DISPLAY: document.querySelector('.display'),
-    INPUT_FIELD: document.querySelector('.input'),
-    FORM: document.querySelector('form'),
-};
+import { UI_ELEMENTS, showResult, clearInputField } from './view.js';
 
-let firstName = '',
-    gender;
+const SERVER_URL = 'https://api.genderize.io';
 
 function getData() {
-    const serverUrl = 'https://api.genderize.io';
-    const url = `${serverUrl}?name=${firstName}`;
+    const firstName = UI_ELEMENTS.INPUT_FIELD.value;
+    const url = `${SERVER_URL}?name=${firstName}`;
 
     return fetch(url)
         .then(response => response.json())
-        .catch(err => {
-            alert(err);
-        });
+        .catch(alert);
 }
 
-function showResult() {
-    UI_ELEMS.DISPLAY.textContent = `"${firstName} - ${gender}"`;
-}
+UI_ELEMENTS.FORM.addEventListener('submit', e => {
+    e.preventDefault();
 
-function writeFirstName(event) {
-    event.preventDefault();
-    firstName = UI_ELEMS.INPUT_FIELD.value;
-}
+    const isInputEmpty = UI_ELEMENTS.INPUT_FIELD.value;
 
-function clearInputField() {
-    UI_ELEMS.INPUT_FIELD.value = '';
-}
+    if (!isInputEmpty) return;
 
-UI_ELEMS.FORM.addEventListener('submit', e => {
-    writeFirstName(e);
+    getData()
+        .then(result => {
+            showResult(result.name, result.gender);
+        })
+        .catch(alert);
+
     clearInputField();
-
-    if (firstName !== '') {
-        getData()
-            .then(result => {
-                gender = result.gender;
-                showResult();
-            })
-            .catch(err => {
-                alert(err);
-            });
-    } else {
-        alert('Введите имя');
-    }
 });
